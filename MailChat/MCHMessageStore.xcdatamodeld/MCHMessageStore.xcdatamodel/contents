@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1811" systemVersion="12C3006" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="MCHConversation" representedClassName="MCHConversation" syncable="YES">
+        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="MCHMessage" inverseName="conversation" inverseEntity="MCHMessage" syncable="YES"/>
+        <relationship name="participants" toMany="YES" minCount="1" deletionRule="Nullify" destinationEntity="MCHUser" inverseName="conversations" inverseEntity="MCHUser" syncable="YES"/>
+    </entity>
+    <entity name="MCHMessage" representedClassName="MCHMessage" syncable="YES">
+        <attribute name="body" attributeType="String" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Date" syncable="YES"/>
+        <attribute name="uuid" attributeType="Transformable" syncable="YES"/>
+        <relationship name="conversation" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="MCHConversation" inverseName="messages" inverseEntity="MCHConversation" syncable="YES"/>
+        <relationship name="recipient" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="MCHUser" inverseName="receivedMessages" inverseEntity="MCHUser" syncable="YES"/>
+        <relationship name="sender" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="MCHUser" inverseName="sentMessages" inverseEntity="MCHUser" syncable="YES"/>
+    </entity>
+    <entity name="MCHUser" representedClassName="MCHUser" syncable="YES">
+        <attribute name="address" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="displayName" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MCHConversation" inverseName="participants" inverseEntity="MCHConversation" syncable="YES"/>
+        <relationship name="receivedMessages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MCHMessage" inverseName="recipient" inverseEntity="MCHMessage" syncable="YES"/>
+        <relationship name="sentMessages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MCHMessage" inverseName="sender" inverseEntity="MCHMessage" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="MCHConversation" positionX="-297" positionY="54" width="128" height="75"/>
+        <element name="MCHMessage" positionX="-117" positionY="90" width="128" height="135"/>
+        <element name="MCHUser" positionX="-477" positionY="108" width="128" height="120"/>
+    </elements>
+</model>

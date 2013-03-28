@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MCHDetailViewController : UIViewController
+@class MCHConversation;
 
-@property (strong, nonatomic) id detailItem;
+@interface MCHDetailViewController : UITableViewController
 
-@property (weak, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
+@property(nonatomic,strong) MCHConversation *conversation;
+
 @end

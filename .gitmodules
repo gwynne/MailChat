@@ -1,0 +1,24 @@
+[submodule "SVPullToRefresh"]
+	path = SVPullToRefresh
+	url = git://github.com/samvermette/SVPullToRefresh.git
+[submodule "MAGenerator"]
+	path = MAGenerator
+	url = git://github.com/gwynne/MAGenerator.git
+[submodule "CocoaAsyncSocket"]
+	path = CocoaAsyncSocket
+	url = git://github.com/gwynne/CocoaAsyncSocket.git
+[submodule "DRAtomicQueue"]
+	path = DRAtomicQueue
+	url = git://github.com/gwynne/DRAtomicQueue.git
+[submodule "Base64"]
+	path = Base64
+	url = git://github.com/nicklockwood/Base64.git
+[submodule "MACollectionUtilities"]
+	path = MACollectionUtilities
+	url = git://github.com/mikeash/MACollectionUtilities.git
+[submodule "GrowingTextView"]
+	path = GrowingTextView
+	url = git://github.com/gwynne/GrowingTextView.git
+[submodule "SVProgressHUD"]
+	path = SVProgressHUD
+	url = git://github.com/samvermette/SVProgressHUD.git

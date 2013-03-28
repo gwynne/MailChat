@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'MailChatServer' target in the 'MailChatServer' project
+//
+
+#ifdef __OBJC__
+	#import <Foundation/Foundation.h>
+#endif
