@@ -9,10 +9,9 @@
 #import "MCHJSONEmailMessageGateway.h"
 #import "MAGenerator.h"
 #import "GCDAsyncSocket.h"
-#import "ELSWAsyncPOP3Socket.h"
+#import "ELWAsyncPOP3Socket.h"
 #import <CommonCrypto/CommonDigest.h>
-#import "NSData+Base64.h"
-#import "NSString+Base64.h"
+#import "Base64.h"
 #import "NSData+MCHUtilities.h"
 #import "NSString+MCHUtilities.h"
 #import <libkern/OSAtomic.h>
@@ -257,7 +256,9 @@ GENERATOR(bool, MCHPOP3StateMachineGenerator(GCDAsyncSocket *socket, NSTimeInter
 			{
 				NSDictionary *message = [[NSDictionary alloc] initWithByteStuffedRFC822Message:rawData];
 				if (message) {
-					[(id<MCHMessageGatewayDelegate>)gateway.delegate gateway:gateway didReceiveIncomingMessage:message];
+					id<MCHMessageGatewayDelegate> __strong delegate = gateway.delegate;
+					
+					[delegate gateway:gateway didReceiveIncomingMessage:message];
 					[socket writeData:[[NSString stringWithFormat:@"DELE %u\r\n", i + 1] dataUsingEncoding:NSASCIIStringEncoding]
 							withTimeout:timeout tag:0];
 					[socket readDataToLength:1 withTimeout:timeout tag:0];
@@ -491,6 +492,7 @@ GENERATOR(bool, MCHSMTPStateMachineGenerator(GCDAsyncSocket *socket, NSTimeInter
 		if (ss) {
 			NSError *error = nil;
 			GCDAsyncSocket *socket = [[GCDAsyncSocket alloc] initWithDelegate:ss delegateQueue:ss->_queue];
+			id<MCHMessageGatewayDelegate> __strong delegate = ss.delegate;
 			
 			socket.userData = @{ @"message": message }.mutableCopy;
 			ss->_lastWriteError = nil;
@@ -501,9 +503,9 @@ GENERATOR(bool, MCHSMTPStateMachineGenerator(GCDAsyncSocket *socket, NSTimeInter
 				ss->_lastWriteError = error;
 			ss->_writeSignal = nil;
 			if (ss->_lastWriteError)
-				[(id<MCHMessageGatewayDelegate>)ss.delegate gateway:ss didFailWithError:ss->_lastWriteError message:message];
+				[delegate gateway:ss didFailWithError:ss->_lastWriteError message:message];
 			else
-				[(id<MCHMessageGatewayDelegate>)ss.delegate gateway:ss didSendOutgoingMessage:message];
+				[delegate gateway:ss didSendOutgoingMessage:message];
 		}
 	});
 }

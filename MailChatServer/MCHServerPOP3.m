@@ -8,10 +8,9 @@
 
 #import "MCHServerPOP3.h"
 #import "GCDAsyncSocket.h"
-#import "NSData+Base64.h"
+#import "Base64.h"
 #import "NSData+MCHUtilities.h"
 #import "NSString+MCHUtilities.h"
-#import "NSString+Base64.h"
 #import "MAGenerator.h"
 #import "Console.h"
 #import "MCHServerCertificates.h"
@@ -235,7 +234,7 @@ enum : int {
 			} else if (match_command(@"LIST", line)) {
 				MCHPOP3ConsoleMessage(@"Client %@ asked for message list\n", vars[@"remote"]);
 				[sock writeData:[@"+OK\r\n" dataUsingEncoding:NSASCIIStringEncoding] withTimeout:timeout tag:0];
-				[vars[@"mailbox"] enumerateObjectsUsingBlock:^ (NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+				[(NSArray *)vars[@"mailbox"] enumerateObjectsUsingBlock:^ (NSDictionary *obj, NSUInteger idx, BOOL *stop) {
 					[sock writeData:[[NSString stringWithFormat:@"%lu %lu\r\n", idx + 1, [obj[@"size"] unsignedIntegerValue]]
 							dataUsingEncoding:NSASCIIStringEncoding]
 						  withTimeout:timeout tag:0];
@@ -257,7 +256,7 @@ enum : int {
 			} else if (match_command(@"UIDL", line)) {
 				MCHPOP3ConsoleMessage(@"Client %@ asked for message ID list\n", vars[@"remote"]);
 				[sock writeData:[@"+OK\r\n" dataUsingEncoding:NSASCIIStringEncoding] withTimeout:timeout tag:0];
-				[vars[@"mailbox"] enumerateObjectsUsingBlock:^ (NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+				[(NSArray *)vars[@"mailbox"] enumerateObjectsUsingBlock:^ (NSDictionary *obj, NSUInteger idx, BOOL *stop) {
 					[sock writeData:[[NSString stringWithFormat:@"%lu %@\r\n", idx + 1, obj[@"uniqueID"]] dataUsingEncoding:NSASCIIStringEncoding]
 						  withTimeout:timeout tag:0];
 				}];

@@ -13,7 +13,7 @@
 
 + (CGSize)sizeForText:(NSAttributedString *)text constrainedToWidth:(CGFloat)maxWidth;
 
-@property(nonatomic,readonly) IBOutlet MCHBubbleButton *bubble;
-@property(nonatomic,readonly) IBOutlet UITextView *label;
+@property(nonatomic,strong) IBOutlet MCHBubbleButton *bubble;
+@property(nonatomic,strong) IBOutlet UITextView *label;
 
 @end

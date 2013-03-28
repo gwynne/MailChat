@@ -8,9 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "GCDAsyncSocket.h"
-#import "NSData+Base64.h"
+#import "Base64.h"
 #import "NSData+MCHUtilities.h"
-#import "NSString+Base64.h"
 #import "MAGenerator.h"
 #import "Console.h"
 #import "MCHServerSMTP.h"

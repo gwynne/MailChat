@@ -1,55 +1,54 @@
 //
-//  ELSWAsyncPOP3Socket.m
+//  ELWAsyncPOP3Socket.m
 //  MailChat
 //
 //  Created by Gwynne Raskind on 12/16/12.
 //  Copyright (c) 2012 Dark Rainfall. All rights reserved.
 //
 
-#import "ELSWAsyncPOP3Socket.h"
-#import "NSData+Base64.h"
-#import "NSString+Base64.h"
+#import "ELWAsyncPOP3Socket.h"
+#import "Base64.h"
 #import "DRAtomicQueue.h"
 #import <libkern/OSAtomic.h>
 #import <CommonCrypto/CommonDigest.h>
 
 typedef enum : uint16_t
 {
-	kELSWPOP3Hello,
-	kELSWPOP3Quit,
-	kELSWPOP3Capabilities,
-	kELSWPOP3AuthUser,
-	kELSWPOP3AuthPass,
-	kELSWPOP3AuthMD5,
-	kELSWPOP3AuthGeneric,
-	kELSWPOP3StartTLS,
-	kELSWPOP3Status,
-	kELSWPOP3List,
-	kELSWPOP3UniqueID,
-	kELSWPOP3TopOrRetrieve,
-	kELSWPOP3Delete,
-	kELSWPOP3Reset,
-} ELSWPOP3CommandType;
+	kELWPOP3Hello,
+	kELWPOP3Quit,
+	kELWPOP3Capabilities,
+	kELWPOP3AuthUser,
+	kELWPOP3AuthPass,
+	kELWPOP3AuthMD5,
+	kELWPOP3AuthGeneric,
+	kELWPOP3StartTLS,
+	kELWPOP3Status,
+	kELWPOP3List,
+	kELWPOP3UniqueID,
+	kELWPOP3TopOrRetrieve,
+	kELWPOP3Delete,
+	kELWPOP3Reset,
+} ELWPOP3CommandType;
 
 enum : long
 {
-	kELSWPOP3TagStatusRead = 1L, // tag for a read of the initial + or - of a response
-	kELSWPOP3TagResponseRead, // tag for a read of single-line remaining response data
-	kELSWPOP3TagMultilineRead, // tag for a read of multiline remaining response data
-	kELSWPOP3TagErrorRead, // tag for a read of an error response
+	kELWPOP3TagStatusRead = 1L, // tag for a read of the initial + or - of a response
+	kELWPOP3TagResponseRead, // tag for a read of single-line remaining response data
+	kELWPOP3TagMultilineRead, // tag for a read of multiline remaining response data
+	kELWPOP3TagErrorRead, // tag for a read of an error response
 };
 
 typedef enum : uint32_t
 {
-	kELSWPOP3StateDISCONNECT = 0, // This state is not part of the POP3 spec
-	kELSWPOP3StateAUTHORIZATION,
-	kELSWPOP3StateTRANSACTION,
-	kELSWPOP3StateUPDATE,
-} ELSWPOP3State;
+	kELWPOP3StateDISCONNECT = 0, // This state is not part of the POP3 spec
+	kELWPOP3StateAUTHORIZATION,
+	kELWPOP3StateTRANSACTION,
+	kELWPOP3StateUPDATE,
+} ELWPOP3State;
 
-@interface ELSWPOP3Command : NSObject
+@interface ELWPOP3Command : NSObject
 
-@property(nonatomic,assign) ELSWPOP3CommandType type;
+@property(nonatomic,assign) ELWPOP3CommandType type;
 @property(nonatomic,strong) NSString *commandLine;
 @property(nonatomic,assign) bool hasMultilineResponse;
 @property(nonatomic,assign) bool hasGoodStatus;
@@ -57,14 +56,14 @@ typedef enum : uint32_t
 
 @end
 
-@implementation ELSWPOP3Command
+@implementation ELWPOP3Command
 @end
 
-@implementation ELSWAsyncPOP3Socket
+@implementation ELWAsyncPOP3Socket
 {
-	__weak id<ELSWAsyncPOP3SocketDelegate> _pop3Delegate;
+	__weak id<ELWAsyncPOP3SocketDelegate> _pop3Delegate;
 
-	ELSWPOP3State _state;
+	ELWPOP3State _state;
 	dispatch_queue_t _myDelegateQueue, _internalDelegateQueue;
 	DRAtomicQueue *_commandQueue;
 
@@ -96,15 +95,15 @@ typedef enum : uint32_t
 
 - (instancetype)initWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)dq socketQueue:(dispatch_queue_t)sq
 {
-	return [self initWithPOP3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)aDelegate delegateQueue:dq socketQueue:sq];
+	return [self initWithPOP3Delegate:(id<ELWAsyncPOP3SocketDelegate>)aDelegate delegateQueue:dq socketQueue:sq];
 }
 
-- (instancetype)initWithPOP3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)aDelegate delegateQueue:(dispatch_queue_t)dq
+- (instancetype)initWithPOP3Delegate:(id<ELWAsyncPOP3SocketDelegate>)aDelegate delegateQueue:(dispatch_queue_t)dq
 {
 	return [self initWithPOP3Delegate:aDelegate delegateQueue:dq socketQueue:NULL];
 }
 
-- (instancetype)initWithPOP3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)aDelegate delegateQueue:(dispatch_queue_t)dq socketQueue:(dispatch_queue_t)sq
+- (instancetype)initWithPOP3Delegate:(id<ELWAsyncPOP3SocketDelegate>)aDelegate delegateQueue:(dispatch_queue_t)dq socketQueue:(dispatch_queue_t)sq
 {
 	if ((self = [super initWithSocketQueue:sq]))
 	{
@@ -135,30 +134,30 @@ typedef enum : uint32_t
 	dispatch_async(_internalDelegateQueue, ^ { [self performBlock:^ { _myDelegateQueue = delegateQueue; }]; });
 }
 
-- (id<ELSWAsyncPOP3SocketDelegate>)pop3Delegate
+- (id<ELWAsyncPOP3SocketDelegate>)pop3Delegate
 {
-	__block id<ELSWAsyncPOP3SocketDelegate> result = nil;
+	__block id<ELWAsyncPOP3SocketDelegate> result = nil;
 	
 	[self performBlock:^ { result = _pop3Delegate; }];
 	return result;
 }
 
-- (void)setPop3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)pop3Delegate
+- (void)setPop3Delegate:(id<ELWAsyncPOP3SocketDelegate>)pop3Delegate
 {
 	dispatch_async(_internalDelegateQueue, ^ { [self performBlock:^ { _pop3Delegate = pop3Delegate; }]; });
 }
 
-- (void)setPOP3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)delegate delegateQueue:(dispatch_queue_t)delegateQueue
+- (void)setPOP3Delegate:(id<ELWAsyncPOP3SocketDelegate>)delegate delegateQueue:(dispatch_queue_t)delegateQueue
 {
 	dispatch_async(_internalDelegateQueue, ^ { [self performBlock:^ { _pop3Delegate = delegate; _myDelegateQueue = delegateQueue; }]; });
 }
 
-- (void)synchronouslySetPOP3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)pop3Delegate
+- (void)synchronouslySetPOP3Delegate:(id<ELWAsyncPOP3SocketDelegate>)pop3Delegate
 {
 	[self performBlock:^ { _pop3Delegate = pop3Delegate; }];
 }
 
-- (void)synchronouslySetPOP3Delegate:(id<ELSWAsyncPOP3SocketDelegate>)pop3Delegate delegateQueue:(dispatch_queue_t)delegateQueue
+- (void)synchronouslySetPOP3Delegate:(id<ELWAsyncPOP3SocketDelegate>)pop3Delegate delegateQueue:(dispatch_queue_t)delegateQueue
 {
 	[self performBlock:^ { _pop3Delegate = pop3Delegate; _myDelegateQueue = delegateQueue; }];
 }
@@ -193,9 +192,9 @@ typedef enum : uint32_t
 	return [@"\r\n.\r\n" dataUsingEncoding:NSASCIIStringEncoding];
 }
 
-- (void)callDelegateSelector:(SEL)cmd sync:(bool)synchronously withBlock:(void (^)(id<ELSWAsyncPOP3SocketDelegate>))block
+- (void)callDelegateSelector:(SEL)cmd sync:(bool)synchronously withBlock:(void (^)(id<ELWAsyncPOP3SocketDelegate>))block
 {
-	id<ELSWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
+	id<ELWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
 	
 	if (_myDelegateQueue == _internalDelegateQueue && synchronously) {
 		if ([delegate respondsToSelector:cmd])
@@ -207,9 +206,9 @@ typedef enum : uint32_t
 	}
 }
 
-- (void)queueCommand:(ELSWPOP3CommandType)type withString:(NSString *)str isMultiline:(bool)isMultiline
+- (void)queueCommand:(ELWPOP3CommandType)type withString:(NSString *)str isMultiline:(bool)isMultiline
 {
-	ELSWPOP3Command *command = [[ELSWPOP3Command alloc] init];
+	ELWPOP3Command *command = [[ELWPOP3Command alloc] init];
 	
 	command.type = type;
 	command.commandLine = str;
@@ -224,15 +223,15 @@ typedef enum : uint32_t
 
 - (void)issueQuit
 {
-	[self queueCommand:kELSWPOP3Quit withString:@"QUIT\r\n" isMultiline:false];
+	[self queueCommand:kELWPOP3Quit withString:@"QUIT\r\n" isMultiline:false];
 }
 
 - (void)requestCapabilitiesWithRefresh:(bool)doRefresh
 {
 	if (!_cachedCapabilities || doRefresh)
-		[self queueCommand:kELSWPOP3Capabilities withString:@"CAPA\r\n" isMultiline:false];
+		[self queueCommand:kELWPOP3Capabilities withString:@"CAPA\r\n" isMultiline:false];
 	else {
-		[self callDelegateSelector:@selector(pop3Socket:didReceiveCapabilityList:) sync:false withBlock:^(id<ELSWAsyncPOP3SocketDelegate> delegate) {
+		[self callDelegateSelector:@selector(pop3Socket:didReceiveCapabilityList:) sync:false withBlock:^(id<ELWAsyncPOP3SocketDelegate> delegate) {
 			[delegate pop3Socket:self didReceiveCapabilityList:_cachedCapabilities];
 		}];
 	}
@@ -245,7 +244,7 @@ typedef enum : uint32_t
 
 - (void)authWithMethod:(NSString *)authMethod initialResponse:(NSData *)initialResponseOrNil
 {
-	[self queueCommand:kELSWPOP3AuthGeneric
+	[self queueCommand:kELWPOP3AuthGeneric
 		  withString:[NSString stringWithFormat:@"AUTH %@ %@\r\n", authMethod,
 						initialResponseOrNil ? initialResponseOrNil.base64EncodedString : @"="]
 		  isMultiline:false];
@@ -260,45 +259,45 @@ typedef enum : uint32_t
 		
 		CC_MD5(hashStr.bytes, hashStr.length, hash);
 		[_cachedAuthMethods push:@"APOP-MD5"];
-		[self queueCommand:kELSWPOP3AuthMD5
+		[self queueCommand:kELWPOP3AuthMD5
 			  withString:[NSString stringWithFormat:@"APOP %@ %@\r\n", username, hashData.base64EncodedString]
 			  isMultiline:false];
 	} else {
 		[_cachedAuthMethods push:@"INSECURE"];
 		[_cachedAuthPasswords push:password];
-		[self queueCommand:kELSWPOP3AuthUser withString:[NSString stringWithFormat:@"USER %@\r\n", username] isMultiline:false];
+		[self queueCommand:kELWPOP3AuthUser withString:[NSString stringWithFormat:@"USER %@\r\n", username] isMultiline:false];
 	}
 }
 
 - (void)startTLS:(NSDictionary *)tlsSettings
 {
-	_state = kELSWPOP3StateDISCONNECT;
+	_state = kELWPOP3StateDISCONNECT;
 	_savedTLSSettings = tlsSettings;
-	[self queueCommand:kELSWPOP3StartTLS withString:@"STLS\r\n" isMultiline:false];
+	[self queueCommand:kELWPOP3StartTLS withString:@"STLS\r\n" isMultiline:false];
 }
 
 - (void)requestStatus
 {
-	[self queueCommand:kELSWPOP3Status withString:@"STAT\r\n" isMultiline:false];
+	[self queueCommand:kELWPOP3Status withString:@"STAT\r\n" isMultiline:false];
 }
 
 - (void)requestMessageSize:(NSInteger)msgNum
 {
-	[self queueCommand:kELSWPOP3List
+	[self queueCommand:kELWPOP3List
 		  withString:[NSString stringWithFormat:@"LIST%s%@\r\n", msgNum == -1 ? "" : " ", msgNum == -1 ? @"" : @(msgNum)]
 		  isMultiline:msgNum == -1];
 }
 
 - (void)requestMessageIdentifier:(NSInteger)msgNum
 {
-	[self queueCommand:kELSWPOP3UniqueID
+	[self queueCommand:kELWPOP3UniqueID
 		  withString:[NSString stringWithFormat:@"UIDL%s%@\r\n", msgNum == -1 ? "" : " ", msgNum == -1 ? @"" : @(msgNum)]
 		  isMultiline:msgNum == -1];
 }
 
 - (void)requestMessage:(NSInteger)msgNum limitedToLines:(NSInteger)lineLimit
 {
-	[self queueCommand:kELSWPOP3TopOrRetrieve
+	[self queueCommand:kELWPOP3TopOrRetrieve
 		  withString:[NSString stringWithFormat:@"%s %d%s%@\r\n", lineLimit == -1 ? "RETR" : "TOP", msgNum,
 						lineLimit == -1 ? "" : " ", lineLimit == -1 ? @"" : @(lineLimit)]
 		  isMultiline:true];
@@ -306,19 +305,19 @@ typedef enum : uint32_t
 
 - (void)markMessageDeleted:(NSInteger)msgNum
 {
-	[self queueCommand:kELSWPOP3Delete withString:[NSString stringWithFormat:@"DELE %d\r\n", msgNum] isMultiline:false];
+	[self queueCommand:kELWPOP3Delete withString:[NSString stringWithFormat:@"DELE %d\r\n", msgNum] isMultiline:false];
 }
 
 - (void)resetMessageStatus
 {
-	[self queueCommand:kELSWPOP3Reset withString:@"RSET\r\n" isMultiline:false];
+	[self queueCommand:kELWPOP3Reset withString:@"RSET\r\n" isMultiline:false];
 }
 
 #pragma mark Response Parsers
 
 #define BAD_RESPONSE(...) do {	\
 	[self callDelegateSelector:@selector(pop3Socket:didReceivePOP3Error:) sync:true	\
-		  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {	\
+		  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {	\
 		  	[delegate pop3Socket:self didReceivePOP3Error:[NSString stringWithFormat:__VA_ARGS__]];	\
 		  }]; \
 	[self disconnect];	\
@@ -376,28 +375,28 @@ typedef enum : uint32_t
 	return result;
 }
 
-- (void)parseHelloResponse:(ELSWPOP3Command *)command
+- (void)parseHelloResponse:(ELWPOP3Command *)command
 {
 	NSRange r = [command.response rangeOfString:@"(<.+?@.+?>)$" options:NSRegularExpressionSearch];
 	
 	_cachedNonce = (r.location == NSNotFound ? nil : [command.response substringWithRange:r]);
 	command.response = [command.response substringToIndex:r.location == NSNotFound ? [command.response length] : r.location];
-	_state = kELSWPOP3StateAUTHORIZATION;
+	_state = kELWPOP3StateAUTHORIZATION;
 	[self callDelegateSelector:@selector(pop3Socket:didSayHello:) sync:false
-		  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didSayHello:command.response]; }];
+		  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didSayHello:command.response]; }];
 }
 
-- (void)parseAuthResponse:(ELSWPOP3Command *)command
+- (void)parseAuthResponse:(ELWPOP3Command *)command
 {
 	switch (command.type)
 	{
-		case kELSWPOP3AuthUser: {
-			[self queueCommand:kELSWPOP3AuthPass withString:[_cachedAuthPasswords pop] isMultiline:false];
+		case kELWPOP3AuthUser: {
+			[self queueCommand:kELWPOP3AuthPass withString:[_cachedAuthPasswords pop] isMultiline:false];
 			break;
 		}
-		case kELSWPOP3AuthGeneric: {
+		case kELWPOP3AuthGeneric: {
 			NSData *response = [NSData dataWithBase64EncodedString:[[NSString alloc] initWithData:command.response encoding:NSASCIIStringEncoding]];
-			id<ELSWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
+			id<ELWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
 			__block NSData *reply = nil;
 
 			if (_internalDelegateQueue == _myDelegateQueue) {
@@ -410,29 +409,29 @@ typedef enum : uint32_t
 				});
 			}
 			if (reply) {
-				[self queueCommand:kELSWPOP3AuthGeneric withString:reply.base64EncodedString isMultiline:false];
+				[self queueCommand:kELWPOP3AuthGeneric withString:reply.base64EncodedString isMultiline:false];
 				break;
 			}
 			// fall-through
 		}
-		case kELSWPOP3AuthPass:
-		case kELSWPOP3AuthMD5: {
-			_state = kELSWPOP3StateTRANSACTION;
+		case kELWPOP3AuthPass:
+		case kELWPOP3AuthMD5: {
+			_state = kELWPOP3StateTRANSACTION;
 			[self callDelegateSelector:@selector(pop3Socket:didAuthenticateWithMethod:) sync:false
-				  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+				  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 				  	[delegate pop3Socket:self didAuthenticateWithMethod:[_cachedAuthMethods pop]];
 				  }];
 			break;
 		}
-		case kELSWPOP3Hello: case kELSWPOP3Quit: case kELSWPOP3Capabilities: case kELSWPOP3StartTLS: case kELSWPOP3Status:
-		case kELSWPOP3List: case kELSWPOP3UniqueID: case kELSWPOP3TopOrRetrieve: case kELSWPOP3Delete: case kELSWPOP3Reset:
+		case kELWPOP3Hello: case kELWPOP3Quit: case kELWPOP3Capabilities: case kELWPOP3StartTLS: case kELWPOP3Status:
+		case kELWPOP3List: case kELWPOP3UniqueID: case kELWPOP3TopOrRetrieve: case kELWPOP3Delete: case kELWPOP3Reset:
 		default: {
 			@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"not an auth command" userInfo:@{ @"command": command }];
 		}
 	}
 }
 
-- (void)parseStatusResponse:(ELSWPOP3Command *)command
+- (void)parseStatusResponse:(ELWPOP3Command *)command
 {
 	if (!_statMatcher)
 		_statMatcher = [NSRegularExpression regularExpressionWithPattern:@"^OK (\\d+) (\\d+)$" options:0 error:nil];
@@ -442,14 +441,14 @@ typedef enum : uint32_t
 		BAD_RESPONSE(@"unknown stat response: %@", command.response);
 	
 	[self callDelegateSelector:@selector(pop3Socket:didReceiveMaildropCount:maildropSize:) sync:false
-		  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+		  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 			[delegate pop3Socket:self
 					  didReceiveMaildropCount:[command.response substringWithRange:[r rangeAtIndex:1]].integerValue
 					  maildropSize:[command.response substringWithRange:[r rangeAtIndex:2]].integerValue];
 		  }];
 }
 
-- (void)parseListResponse:(ELSWPOP3Command *)command
+- (void)parseListResponse:(ELWPOP3Command *)command
 {
 	if (!_listMatcher)
 		_listMatcher = [NSRegularExpression regularExpressionWithPattern:@"^(OK )?(\\d+) (\\d+)$"
@@ -475,10 +474,10 @@ typedef enum : uint32_t
 		   forKey:@([response substringWithRange:[r rangeAtIndex:2]].integerValue)];
 	}
 	[self callDelegateSelector:@selector(pop3Socket:didReceiveMessageInfoList:) sync:false
-		  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didReceiveMessageInfoList:d]; }];
+		  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didReceiveMessageInfoList:d]; }];
 }
 
-- (void)parseUIDResponse:(ELSWPOP3Command *)command
+- (void)parseUIDResponse:(ELWPOP3Command *)command
 {
 	if (!_uidMatcher)
 		_uidMatcher = [NSRegularExpression regularExpressionWithPattern:@"^(OK )?(\\d+) (.+)$"
@@ -503,65 +502,65 @@ typedef enum : uint32_t
 		[d setObject:[response substringWithRange:[r rangeAtIndex:3]] forKey:@([response substringWithRange:[r rangeAtIndex:2]].integerValue)];
 	}
 	[self callDelegateSelector:@selector(pop3Socket:didReceiveMessageInfoList:) sync:false
-		  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didReceiveMessageInfoList:d]; }];
+		  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didReceiveMessageInfoList:d]; }];
 }
 
-- (void)dispatchCommand:(ELSWPOP3Command *)command
+- (void)dispatchCommand:(ELWPOP3Command *)command
 {
 	switch (command.type)
 	{
-		case kELSWPOP3Hello:
+		case kELWPOP3Hello:
 			[self parseHelloResponse:command];
 			[self requestCapabilitiesWithRefresh:true];
 			break;
-		case kELSWPOP3Quit:
-			_state = kELSWPOP3StateUPDATE;
+		case kELWPOP3Quit:
+			_state = kELWPOP3StateUPDATE;
 			break;
-		case kELSWPOP3Capabilities: {
+		case kELWPOP3Capabilities: {
 			_cachedCapabilities = [command.response componentsSeparatedByString:@"\n"];
 			_cachedCapabilities = [_cachedCapabilities subarrayWithRange:(NSRange){ 1, _cachedCapabilities.count }];
 			[self callDelegateSelector:@selector(pop3Socket:didReceiveCapabilityList:) sync:false
-				  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didReceiveCapabilityList:_cachedCapabilities]; }];
+				  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didReceiveCapabilityList:_cachedCapabilities]; }];
 			break;
 		}
-		case kELSWPOP3AuthUser:
-		case kELSWPOP3AuthPass:
-		case kELSWPOP3AuthGeneric:
-		case kELSWPOP3AuthMD5:
+		case kELWPOP3AuthUser:
+		case kELWPOP3AuthPass:
+		case kELWPOP3AuthGeneric:
+		case kELWPOP3AuthMD5:
 			[self parseAuthResponse:command];
 			break;
-		case kELSWPOP3StartTLS:
-			_state = kELSWPOP3StateDISCONNECT;
+		case kELWPOP3StartTLS:
+			_state = kELWPOP3StateDISCONNECT;
 			[self startTLS:_savedTLSSettings];
 			_savedTLSSettings = nil;
 			break;
-		case kELSWPOP3Status:
+		case kELWPOP3Status:
 			[self parseStatusResponse:command];
 			break;
-		case kELSWPOP3List:
+		case kELWPOP3List:
 			[self parseListResponse:command];
 			break;
-		case kELSWPOP3UniqueID:
+		case kELWPOP3UniqueID:
 			[self parseUIDResponse:command];
 			break;
-		case kELSWPOP3TopOrRetrieve: {
+		case kELWPOP3TopOrRetrieve: {
 			[self callDelegateSelector:@selector(pop3Socket:didReceiveMessage:withNumber:) sync:false
-				  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+				  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 				  	[delegate pop3Socket:self didReceiveMessage:command.response
 				  			  withNumber:[command.commandLine substringFromIndex:5].integerValue];
 				  }];
 			break;
 		}
-		case kELSWPOP3Delete: {
+		case kELWPOP3Delete: {
 			[self callDelegateSelector:@selector(pop3Socket:didMarkMessage:deleted:) sync:false
-				  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+				  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 				  	[delegate pop3Socket:self didMarkMessage:[command.commandLine substringFromIndex:5].integerValue deleted:true];
 				  }];
 			break;
 		}
-		case kELSWPOP3Reset: {
+		case kELWPOP3Reset: {
 			[self callDelegateSelector:@selector(pop3Socket:didMarkMessage:deleted:) sync:false
-				  withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didMarkMessage:-1 deleted:false]; }];
+				  withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) { [delegate pop3Socket:self didMarkMessage:-1 deleted:false]; }];
 			break;
 		}
 		default:
@@ -574,27 +573,27 @@ typedef enum : uint32_t
 
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port
 {
-	if (OSAtomicCompareAndSwap32(kELSWPOP3StateDISCONNECT, kELSWPOP3StateAUTHORIZATION, (int32_t *)&_state))
+	if (OSAtomicCompareAndSwap32(kELWPOP3StateDISCONNECT, kELWPOP3StateAUTHORIZATION, (int32_t *)&_state))
 	{
-		[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+		[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 			[delegate socket:sock didConnectToHost:host port:port];
 		}];
-		[self queueCommand:kELSWPOP3Hello withString:nil isMultiline:false];
-		[self readDataToLength:1 withTimeout:_operationTimeout tag:kELSWPOP3TagStatusRead];
+		[self queueCommand:kELWPOP3Hello withString:nil isMultiline:false];
+		[self readDataToLength:1 withTimeout:_operationTimeout tag:kELWPOP3TagStatusRead];
 	}
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
-	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 		[delegate socket:sock didReadData:data withTag:tag];
 	}];
 
-	ELSWPOP3Command *command = [_commandQueue pop];
+	ELWPOP3Command *command = [_commandQueue pop];
 			
 	switch (tag)
 	{
-		case kELSWPOP3TagStatusRead:
+		case kELWPOP3TagStatusRead:
 			if (data.length < 1)
 				BAD_RESPONSE(@"no POP3 response where there should be");
 			switch (*(char *)data.bytes)
@@ -602,37 +601,37 @@ typedef enum : uint32_t
 				case '+':
 					command.hasGoodStatus = true;
 					if (command.hasMultilineResponse)
-						[self readDataToData:[self.class terminatorData] withTimeout:_operationTimeout tag:kELSWPOP3TagMultilineRead];
+						[self readDataToData:[self.class terminatorData] withTimeout:_operationTimeout tag:kELWPOP3TagMultilineRead];
 					else
-						[self readDataToData:[GCDAsyncSocket CRLFData] withTimeout:_operationTimeout tag:kELSWPOP3TagResponseRead];
+						[self readDataToData:[GCDAsyncSocket CRLFData] withTimeout:_operationTimeout tag:kELWPOP3TagResponseRead];
 					break;
 				case '-':
-					[self readDataToData:[GCDAsyncSocket CRLFData] withTimeout:_operationTimeout tag:kELSWPOP3TagErrorRead];
+					[self readDataToData:[GCDAsyncSocket CRLFData] withTimeout:_operationTimeout tag:kELWPOP3TagErrorRead];
 					break;
 				default:
 					BAD_RESPONSE(@"unknown POP3 response: %@", data);
 			}
 			[_commandQueue unPop:command];
 			break;
-		case kELSWPOP3TagResponseRead:
+		case kELWPOP3TagResponseRead:
 			if (!command.hasGoodStatus || command.hasMultilineResponse) // yes, throwing an exception will blow up hard in a queue like this
 				@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"command queue bad" userInfo:@{ @"command": command }];
 			if (data.length < [GCDAsyncSocket CRLFData].length)
 				BAD_RESPONSE(@"single-line response too short to hold terminator: %@", data);
 			command.response = [self fullSingleLineResponse:data];
 			[self dispatchCommand:command];
-			[self readDataToLength:1 withTimeout:_operationTimeout tag:kELSWPOP3TagStatusRead]; // start the next command's read, even if there isn't one
+			[self readDataToLength:1 withTimeout:_operationTimeout tag:kELWPOP3TagStatusRead]; // start the next command's read, even if there isn't one
 			break;
-		case kELSWPOP3TagMultilineRead:
+		case kELWPOP3TagMultilineRead:
 			if (!command.hasGoodStatus || !command.hasMultilineResponse) // yes, throwing an exception will blow up hard in a queue like this
 				@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"command queue bad" userInfo:@{ @"command": command }];
 			if (data.length < [self.class terminatorData].length)
 				BAD_RESPONSE(@"multiline response too short to hold terminator: %@", data);
 			command.response = [self undoByteStuffingOfData:data];
 			[self dispatchCommand:command];
-			[self readDataToLength:1 withTimeout:_operationTimeout tag:kELSWPOP3TagStatusRead]; // start the next read
+			[self readDataToLength:1 withTimeout:_operationTimeout tag:kELWPOP3TagStatusRead]; // start the next read
 			break;
-		case kELSWPOP3TagErrorRead:
+		case kELWPOP3TagErrorRead:
 			if (command.hasGoodStatus) // yes, throwing an exception will blow up hard in a queue like this
 				@throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"command queue bad" userInfo:@{ @"command": command }];
 			if (data.length < [GCDAsyncSocket CRLFData].length)
@@ -647,21 +646,21 @@ typedef enum : uint32_t
 
 - (void)socket:(GCDAsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag
 {
-	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 		[delegate socket:sock didReadPartialDataOfLength:partialLength tag:tag];
 	}];
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
-	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 		[delegate socket:sock didWriteDataWithTag:tag];
 	}];
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag
 {
-	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 		[delegate socket:sock didWritePartialDataOfLength:partialLength tag:tag];
 	}];
 }
@@ -670,7 +669,7 @@ typedef enum : uint32_t
                                                                  elapsed:(NSTimeInterval)elapsed
                                                                bytesDone:(NSUInteger)length
 {
-	id<ELSWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
+	id<ELWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
 	
 	if (_myDelegateQueue == _internalDelegateQueue && [delegate respondsToSelector:_cmd])
 		return [delegate socket:sock shouldTimeoutReadWithTag:tag elapsed:elapsed bytesDone:length];
@@ -688,7 +687,7 @@ typedef enum : uint32_t
                                                                   elapsed:(NSTimeInterval)elapsed
                                                                 bytesDone:(NSUInteger)length
 {
-	id<ELSWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
+	id<ELWAsyncPOP3SocketDelegate> delegate = _pop3Delegate;
 	
 	if (_myDelegateQueue == _internalDelegateQueue && [delegate respondsToSelector:_cmd])
 		return [delegate socket:sock shouldTimeoutWriteWithTag:tag elapsed:elapsed bytesDone:length];
@@ -704,8 +703,8 @@ typedef enum : uint32_t
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
-	_state = kELSWPOP3StateDISCONNECT;
-	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) {
+	_state = kELWPOP3StateDISCONNECT;
+	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) {
 		[delegate socketDidDisconnect:sock withError:err];
 	}];
 }
@@ -713,8 +712,8 @@ typedef enum : uint32_t
 - (void)socketDidSecure:(GCDAsyncSocket *)sock
 {
 	// reissue the hello command after TLS success
-	[self queueCommand:kELSWPOP3Hello withString:@"" isMultiline:false];
-	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELSWAsyncPOP3SocketDelegate> delegate) { [delegate socketDidSecure:sock]; }];
+	[self queueCommand:kELWPOP3Hello withString:@"" isMultiline:false];
+	[self callDelegateSelector:_cmd sync:false withBlock:^ (id<ELWAsyncPOP3SocketDelegate> delegate) { [delegate socketDidSecure:sock]; }];
 }
 
 @end
