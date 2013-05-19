@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EAEB554D17499BC600D51C90 /* MGOrderedDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = EAEB554C17499BC600D51C90 /* MGOrderedDictionary.m */; };
 		FA1FD246167265E700A0CBEB /* MCHBubbleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1FD245167265E700A0CBEB /* MCHBubbleButton.m */; };
 		FA37BA78167B9D1A009C5AF8 /* MCHMessageGateway.m in Sources */ = {isa = PBXBuildFile; fileRef = FA37BA77167B9D1A009C5AF8 /* MCHMessageGateway.m */; };
 		FA37BA92167BF47D009C5AF8 /* MCHJSONEmailMessageGateway.m in Sources */ = {isa = PBXBuildFile; fileRef = FA37BA91167BF47D009C5AF8 /* MCHJSONEmailMessageGateway.m */; };
@@ -74,7 +75,6 @@
 		FAA67E9F168AB2D000CC746C /* MCHServerProtocolCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA67E9E168AB2CF00CC746C /* MCHServerProtocolCommon.m */; };
 		FAA67EA8168B587E00CC746C /* NSString+MCHUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA67EA7168B587E00CC746C /* NSString+MCHUtilities.m */; };
 		FAA67EA9168B587E00CC746C /* NSString+MCHUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA67EA7168B587E00CC746C /* NSString+MCHUtilities.m */; };
-		FAB9A4DF1692454000497B89 /* MGOrderedDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB9A4DD1692454000497B89 /* MGOrderedDictionary.m */; };
 		FAB9A4F9169342A800497B89 /* MCHMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB9A4F8169342A800497B89 /* MCHMessage.m */; };
 		FAB9A4FC169342BF00497B89 /* MCHConversation.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB9A4FB169342BF00497B89 /* MCHConversation.m */; };
 		FAB9A4FF169342BF00497B89 /* MCHUser.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB9A4FE169342BF00497B89 /* MCHUser.m */; };
@@ -101,6 +101,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		EAEB554B17499BC600D51C90 /* MGOrderedDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MGOrderedDictionary.h; path = MGOrderedDictionary/MGOrderedDictionary.h; sourceTree = SOURCE_ROOT; };
+		EAEB554C17499BC600D51C90 /* MGOrderedDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MGOrderedDictionary.m; path = MGOrderedDictionary/MGOrderedDictionary.m; sourceTree = SOURCE_ROOT; };
 		FA1FD244167265E700A0CBEB /* MCHBubbleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCHBubbleButton.h; sourceTree = "<group>"; };
 		FA1FD245167265E700A0CBEB /* MCHBubbleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCHBubbleButton.m; sourceTree = "<group>"; };
 		FA37BA76167B9D1A009C5AF8 /* MCHMessageGateway.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCHMessageGateway.h; sourceTree = "<group>"; };
@@ -189,8 +191,6 @@
 		FAA67E9E168AB2CF00CC746C /* MCHServerProtocolCommon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCHServerProtocolCommon.m; sourceTree = "<group>"; };
 		FAA67EA6168B587E00CC746C /* NSString+MCHUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MCHUtilities.h"; sourceTree = "<group>"; };
 		FAA67EA7168B587E00CC746C /* NSString+MCHUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MCHUtilities.m"; sourceTree = "<group>"; };
-		FAB9A4DC1692454000497B89 /* MGOrderedDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MGOrderedDictionary.h; path = ../../MGOrderedDictionary/MGOrderedDictionary.h; sourceTree = "<group>"; };
-		FAB9A4DD1692454000497B89 /* MGOrderedDictionary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MGOrderedDictionary.m; path = ../../MGOrderedDictionary/MGOrderedDictionary.m; sourceTree = "<group>"; };
 		FAB9A4F7169342A800497B89 /* MCHMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCHMessage.h; sourceTree = "<group>"; };
 		FAB9A4F8169342A800497B89 /* MCHMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCHMessage.m; sourceTree = "<group>"; };
 		FAB9A4FA169342BF00497B89 /* MCHConversation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCHConversation.h; sourceTree = "<group>"; };
@@ -338,8 +338,8 @@
 			isa = PBXGroup;
 			children = (
 				FAB9A5071694375500497B89 /* SVProgressHUD */,
-				FAB9A4DC1692454000497B89 /* MGOrderedDictionary.h */,
-				FAB9A4DD1692454000497B89 /* MGOrderedDictionary.m */,
+				EAEB554B17499BC600D51C90 /* MGOrderedDictionary.h */,
+				EAEB554C17499BC600D51C90 /* MGOrderedDictionary.m */,
 				FACDBAA91703E34F0059F0A7 /* Base64.h */,
 				FACDBAAA1703E34F0059F0A7 /* Base64.m */,
 				FA37BAFB16812BB0009C5AF8 /* DRAtomicQueue.h */,
@@ -594,7 +594,6 @@
 				FAA67E7216864B7200CC746C /* NSData+MCHUtilities.m in Sources */,
 				FAA67EA8168B587E00CC746C /* NSString+MCHUtilities.m in Sources */,
 				FA3BF65D168E25A800EECF2E /* MCHMessageStore.xcdatamodeld in Sources */,
-				FAB9A4DF1692454000497B89 /* MGOrderedDictionary.m in Sources */,
 				FAB9A4F9169342A800497B89 /* MCHMessage.m in Sources */,
 				FAB9A4FC169342BF00497B89 /* MCHConversation.m in Sources */,
 				FAB9A4FF169342BF00497B89 /* MCHUser.m in Sources */,
@@ -602,6 +601,7 @@
 				FAB9A50C1694375500497B89 /* SVProgressHUD.m in Sources */,
 				FAB9A50F1694A06D00497B89 /* NSIndexPath+MCHUITableViewUnsignedIndexes.m in Sources */,
 				FACDBAAB1703E34F0059F0A7 /* Base64.m in Sources */,
+				EAEB554D17499BC600D51C90 /* MGOrderedDictionary.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -800,6 +800,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer: Allyn Raskind (Z25ULQ2TJL)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MailChat/MailChat-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				INFOPLIST_FILE = "MailChat/MailChat-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "F8E66273-CE8A-4C98-A1C4-D9EF1CC96254";
@@ -815,6 +816,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer: Allyn Raskind (Z25ULQ2TJL)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MailChat/MailChat-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				INFOPLIST_FILE = "MailChat/MailChat-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "F8E66273-CE8A-4C98-A1C4-D9EF1CC96254";
