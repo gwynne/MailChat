@@ -22,3 +22,6 @@
 [submodule "SVProgressHUD"]
 	path = SVProgressHUD
 	url = git://github.com/samvermette/SVProgressHUD.git
+[submodule "MGOrderedDictionary"]
+	path = MGOrderedDictionary
+	url = git://github.com/gwynne/MGOrderedDictionary.git
